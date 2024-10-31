@@ -1,11 +1,15 @@
 <?xml version="1.0"?>
-<robot name="world" xmlns:xacro="http://www.ros.org/wiki/xacro">
+<robot name="terrain" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
   <material name="water">
     <color rgba="0.02 0.26 0.46 0.6"/>
   </material>
 
-  <link name="world">
+  <link name="world"/>
+
+
+
+  <link name="terrain">
     <visual>
     <geometry>
         <mesh filename="file://$(find ecn_2023)/urdf/world/MangaliaTerrain.dae"  scale="1.0 1.0 2.0"/>
@@ -13,6 +17,7 @@
       <origin xyz="0 0 -5"/>
     </visual>
   </link>
+
 
   <link name="surface">
     <visual>
@@ -23,9 +28,14 @@
     </visual>
   </link>
 
-  <joint name="surface" type="fixed">
+  <joint name="surface_jnt" type="fixed">
     <parent link="world"/>
     <child link="surface"/>
+  </joint>
+
+  <joint name="terrain_jnt" type="fixed">
+    <parent link="world"/>
+    <child link="terrain"/>
   </joint>
 
 </robot>
