@@ -30,4 +30,4 @@ endif()
 install(PROGRAMS src/uav_sim.py DESTINATION lib/${PROJECT_NAME})
 install(DIRECTORY urdf launch DESTINATION share/${PROJECT_NAME})
   
-ament_auto_package()
+ament_auto_package(USE_SCOPED_HEADER_INSTALL_DIR)

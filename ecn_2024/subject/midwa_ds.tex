@@ -1,0 +1,103 @@
+\documentclass{ecnreport}
+
+\stud{OD Robotique 2024-2025}
+\topic{ROS 2 exam}
+
+\begin{document}
+
+\inserttitle{ROS 2 exam}
+
+\insertsubtitle{2h, documents / internet allowed (closed chats please)}
+
+
+\section{Description}
+
+In this exam you will have to write a C++ or Python node and run it several times through a launch file.\\
+
+The package should first be compiled, then the simulation can be run once and for all with:
+\begin{bashcodelarge}
+ ros2 launch ecn_2024 simulation_launch.py
+\end{bashcodelarge}
+
+This simulation involves several robots (5 in the initial simulation). You can add more by modifying \okt{simulation_launch.py}. Each robot is controlled through the \okt{cmd_vel} topic of its own namespace.\\
+
+Another node, namely \okt{letter2path}, is run with the simulation and advertizes the service \okt{/plan}. This service is of type \okt{ecn_2024/srv/Letter} and returns the contour corresponding to a given letter.
+
+The resulting package should then be zipped and uploaded to \link{https://box.ec-nantes.fr/s/Eid24Ery4zW5z2W}{this folder}.
+
+
+\section{Control node}
+
+The control node should be run for each robot and should:
+\begin{itemize}
+ \item Call the \okt{/plan} service to get the contour to draw a given letter
+ \item Move the robot from a timer callback, in order to track the path
+ \item Optionally, publish the path that is tracked by the robot
+\end{itemize}
+The control node has a \okt{tracker} member variable that will take care of the actual control law. It needs to be given:
+\begin{itemize}
+ \item the frame that should be controlled, typically obtained through a parameter.\\The frame has the shape \okt{robot_name/base_link}
+ \item the path that is to be tracked, obtained by calling the service
+\end{itemize}
+
+
+\subsection{Calling the service}
+
+The service definition is given by \okt{ros2 interface show  ecn_2024/srv/Letter}:
+
+\begin{center}
+ \begin{tabular}{p{6cm}|p{6cm}}
+  Request & Response \\\hline
+  \okt{string letter}\newline \okt{float64 x}\newline \okt{float64 y} &
+  \okt{geometry_msgs/Point[] contour}
+ \end{tabular}
+\end{center}
+
+The request should be filled with node parameters \okt{x, y} and \okt{letter} so that they can be modified when launching the node.\\
+
+\subsubsection{C++} The method to call a service, assuming \okt{client} is the name of the client, is:
+\begin{cppcode}
+client->wait_for_service();
+client->async_send_request(request, <callback function>);
+\end{cppcode}
+
+The callback function is already created as \okt{client_cb}. This callback should:
+
+\begin{itemize}
+ \item initialize the \okt{tracker} from the response (\okt{.initFrom} function)
+ \item (optional) convert the contour into an actual \okt{nav_msgs/Path} in order to visualize it in RViz
+\end{itemize}
+
+In such a callback, the argument is a \okt{SharedFuture} and as such:
+\begin{itemize}
+ \item \okt{result = future.get()} is a pointer to the actual result
+ \item the contour is obtained through \okt{result->contour}
+\end{itemize}
+
+\subsubsection{Python} The way to call the service, asuming \okt{client} is the name of the client, is:
+\begin{pythoncode}
+client.wait_for_service();
+future = client.call_async(req)
+future.add_done_callback(<callback function>)
+\end{pythoncode}
+
+In the callback function you should consider the response and use \okt{self.tracker.initFrom}
+
+\subsection{Moving the robot}
+
+The robot should move with a timer running at 10 Hz. The \okt{tracker} member variable has a \okt{track()} method that will return two values $(v,\omega)$ that let the robot track its contour.\\
+
+This values should be converted to the appropriate message and published on the \okt{cmd_vel} topic under the corresponding namespace.\\
+
+If the tracker was not correctly initialized (wrong frame / no contour to track) then the velocity will be null but the logic still holds.\\
+
+(optional) If the actual path was saved in the callback, you just need to update its timestamp so that RViz continues to display it.
+
+
+\section{The launch file}
+
+As always, write the main node for one robot only, then make it generic. A launch file named \okt{fleet_launch.py} should then run your node for several robots, inside each robot's namespace.\\
+
+You can pick the letters you want and in order to draw a word, each letter should have an offset of +10 along \okt{x} compared to the previous one. You can also add a vertical offset if you want.
+
+\end{document}

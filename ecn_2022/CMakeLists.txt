@@ -14,4 +14,4 @@ target_include_directories(control_node PRIVATE include ${Eigen3_INCLUDE_DIRS})
 
 install(DIRECTORY launch DESTINATION share/${PROJECT_NAME})
   
-ament_auto_package()
+ament_auto_package(USE_SCOPED_HEADER_INSTALL_DIR)
