@@ -16,7 +16,7 @@ In this exam you will have to write a C++ node and run it two times through a la
 
 The package should first be compiled, then the simulation can be run once and for all with:
 \begin{bashcodelarge}
- ros2 launch ecn_exam_2022 simulation_launch.py
+ ros2 launch ecn_2022 simulation_launch.py
 \end{bashcodelarge}
 
 This simulation involves the Baxter robot. The goal is to move the two arms by giving velocity commands on the end-effectors.\\
@@ -69,12 +69,12 @@ float64[42] jacobian   # the 42 coefficients of the Jacobian (or inverse) matrix
 
 Velocity setpoints can be published as \okt{geometry\_msgs/msg/Twist} through this launch file:
 \begin{bashcodelarge}
- ros2 launch ecn_exam_2022 slider_launch.py
+ ros2 launch ecn_2022 slider_launch.py
 \end{bashcodelarge}
 
 \section{Tips}
 
-Compile the code once using \okt{colbuild --packages-select ecn_exam_2022}. Then, use \okt{gqt} in the package folder to configure QtCreator. Do not forget to use it with ROS 2 setup.\\
+Compile the code once using \okt{colbuild --packages-select ecn_2022}. Then, use \okt{gqt} in the package folder to configure QtCreator. Do not forget to use it with ROS 2 setup.\\
 
 In order to efficiently debug your code, it is strongly advised to do the initial development with hard-coded values.
 This node should do all necessary things with hard-coded parameters and topics.\\
