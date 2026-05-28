@@ -1,0 +1,83 @@
+\documentclass{ecnreport}
+
+\stud{OD Robotique 2025-2026}
+\topic{ROS 2 exam}
+
+\begin{document}
+
+\inserttitle{ROS 2 exam}
+
+\insertsubtitle{2h, documents / internet allowed (closed chats please)}
+
+
+\section{Description}
+
+In this exam you will have to write a C++ node and run it several times through a launch file.\\
+
+The package should first be compiled, and you can configure the IDE with:
+\begin{bashcodelarge}
+ cd ~/ros2/src/ecn_2025 # or wherever you have put the repo
+ colbuild -t            # compile this package
+ ideconf                # generate the IDE config file
+\end{bashcodelarge}
+
+Then the simulation can be run once and for all with:
+\begin{bashcodelarge}
+ ros2 launch ecn_2025 simulation_launch.py
+\end{bashcodelarge}
+
+This simulation involves the Baxter robot which has to perform visual servoing with each of its arms.
+In order to do this, you have to publish a joint velocity command for the arm in order to align the target with the camera frame.
+
+
+\section{Control node}
+
+The control node (\okt{control\_node.cpp}) should be run for each arm and should:
+\begin{itemize}
+ \item Retrieve the  pose of the target with regards to the camera
+ \item Retrieve the ${}^e\mathbf{J}_e$ Jacobian through a service
+ \item Compute the control law and publish it as joint velocity
+\end{itemize}
+
+All examples below use the left arm, just replace with \okt{right} for the other limb.
+
+\subsection{Relative pose between target and camera}
+
+The frames are named as follows:
+ \begin{itemize}
+  \item the camera frame name is \okt{left\_hand\_camera}
+  \item the target frame name is \okt{left\_target}
+  \end{itemize}
+
+  Use the provided TF \okt{buffer} in order to check is the transform is available and to get it if it is the case.
+  Note that we are only interested in the \okt{Transform}, while \okt{buffer.lookupTransform} returns a \okt{TransformStamped}. Make sure that the transform you get is in the correct direction (e.g. Z should be positive as the object is in front of the camera).
+
+\subsection{Calling the Jacobian service}
+
+The simulation proposes a service for each arm to retrieve the current Jacobian. It is of type \okt{baxter_simple_sim::srv::Jacobian}. Use the following command to have an overview of this service:
+\begin{bashcodelarge}
+ros2 interface show baxter_simple_sim/srv/Jacobian
+\end{bashcodelarge}
+
+In our case we want to set the \okt{ee_frame} field to \okt{True} and do not provide any joint position, as we use the current ones.
+
+The service can be called at the following address: \okt{/robot/limb/left/jacobian}.\\
+As in the lab 3, we use a wrapper (namely \okt{ServiceNodeSync}) to have synchronous service calls. This wrapper should:
+\begin{itemize}
+ \item be initialized with a unique name and the address of the service though the \okt{init} function
+ \item call the service with the \okt{call} function that returns a \okt{std::optional<Response>}.
+\end{itemize}
+If the returned \okt{std::optional} has a value (\okt{response.has_value()}) then the Jacobian is accessed with \okt{response->jacobian}.
+
+\subsection{Visual servoing control law}
+
+The function \okt{computeVisualServo} takes the pose of the target in the camera frame and the end-effector Jacobian. It returns a \okt{std::vector<double>} for the joint velocity that tracks the object. This value should be written in the command message and published on the well-known topic \okt{/robot/limb/left/joint_command}.
+
+\section{The launch file}
+
+Once your node runs for a given arm, add a parameter to pick the side (left or right) and run it twice through the \okt{both_launch.py} launch file.
+
+Give two separate names to the node or there might be a name conflict. You do not need to use any namespace, the side parameter should be enough to handle all topics, services and frame names.
+
+
+\end{document}
