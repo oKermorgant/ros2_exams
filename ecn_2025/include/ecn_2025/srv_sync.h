@@ -5,6 +5,9 @@
 
 using namespace std::chrono_literals;
 
+namespace visp{}
+using namespace visp;
+
 template <class ServiceT>
 class ServiceNodeSync
 {

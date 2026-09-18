@@ -4,6 +4,9 @@
 #include <visp/vpGaussRand.h>
 #include <visp/vpQuadProg.h>
 
+namespace visp{}
+using namespace visp;
+
 std::vector<double> computeVisualServo(const geometry_msgs::msg::Transform &cMo,
                                        const std::array<double, 42> &eJe)
 {

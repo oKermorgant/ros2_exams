@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.5)
 project(ecn_2025)
 
 find_package(ament_cmake_auto REQUIRED)
